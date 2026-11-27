@@ -1,0 +1,11 @@
+{
+  "name": "osampo",
+  "version": "0.1.0",
+  "description": "The Osampo puppy inside Claude Code: walk gauge, reminders, paw and bark when Claude waits",
+  "author": {
+    "name": "Livio Gamassia"
+  },
+  "homepage": "https://github.com/agaches/osampo",
+  "license": "MIT AND CC-BY-SA-3.0",
+  "types": "./types/index.d.ts"
+}

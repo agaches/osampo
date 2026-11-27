@@ -28,6 +28,11 @@ dog sits on your taskbar.
 
 *Recorded with the desktop simulator (`tools/demos.py`). Longer clips: `docs/media/*.mp4`.*
 
+**No board? The same puppy lives in Claude Code.** A panel beside the chat, drawn from the
+board's own sprites ([install](#claude-code-mod)):
+
+<img src="docs/media/claude-mod.webp" alt="Claude Code with the Osampo panel on the right: Claude answers and the puppy gives its paw, then fetches the ball, takes a bath, chews its bone, rolls over and leaves for a walk" width="800">
+
 ## The idea
 
 Osampo is a small companion with needs of its own:
@@ -137,10 +142,33 @@ it commands, or keep it busy so your PC cannot connect.
 - **Claude Code:** add the hook to `~/.claude/settings.json` so the puppy knows when Claude
   waits for you. The exact JSON is in [`daemon/hooks/README.md`](daemon/hooks/README.md).
 
+## Claude Code mod
+
+The puppy in a panel beside your Claude Code chat, no board or daemon needed. Install it from a
+Claude Code session:
+
+```
+/plugin install osampo --marketplace agaches/osampo
+```
+
+Answer `y` to add the marketplace, then pick a scope. From a shell:
+`claude plugin install osampo --marketplace agaches/osampo`.
+
+- The panel opens by itself in a terminal at least 144 columns wide; `/osampo` opens it at any
+  width. Narrower, the puppy keeps one line above the prompt.
+- It asks for its walk after 90 minutes of work and at the reminder times, raises its paw when
+  Claude waits for you, barks after 2 minutes, and sleeps at night. Same defaults as the board.
+- It uses the default values and does not read your config: `~/.config/osampo/osampo.toml`
+  (custom reminders, `seuil_reclame`, `retour_min`) does not change it.
+- Buttons, or `/osampo walk | snooze | pet | ball | bone | brush | hide | show`.
+- It runs on its own: it does not talk to the daemon or the board. For those, keep the hook above.
+- Develop: `claude --plugin-dir claude-mod`; tests: `claude plugin test claude-mod`; sprites:
+  `python3 -I claude-mod/tools/gen_sprites.py`.
+
 ## Develop
 
 ```sh
-tests/run_all.sh                         # Rust, C++, installer, publication check, acceptance
+tests/run_all.sh                         # Rust, C++, installer, publication check, Claude mod, acceptance
 cmake -B widgets/osampo/desktop/build -S widgets/osampo/desktop    # needs CMake, a C++ compiler
 cmake --build widgets/osampo/desktop/build
 widgets/osampo/desktop/build/osampo --fake    # the puppy in a window, with fake data
@@ -152,7 +180,8 @@ tools/architecture.sh                    # regenerate docs/architecture.md from 
 - [PC-side requirements](docs/requirements.md) (French), each one covered by an acceptance
   test in `tests/acceptance/`.
 
-Most code comments and the puppy's texts are in French.
+Most code comments and the puppy's texts on the board and the PC are in French; the Claude
+Code mod is in English.
 
 ## Credits and licenses
 

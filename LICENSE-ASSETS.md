@@ -9,8 +9,8 @@ Osampo's **source code** is under the [MIT License](LICENSE). Some **artwork** a
 
 | Files | Author | License | Source |
 |---|---|---|---|
-| Front-facing puppy poses: `widgets/osampo/ui/sprites/` `repos.png`, `patte.png`, `content.png`, `aboie.png`, `boude.png`, `tournis.png`, `laisse.png`, `lache.png`, `bain.png`, `bain_mousse.png`, `bain_fin.png`, `os.png`, `os_fin.png`; the contact sheet `widgets/osampo/tools/planche_contact.png`; the demo clips in `docs/media/` that show them; the original `widgets/osampo/assets/third_party/strawheart_animals_and_tea/pixel-ani-dog.gif` | **strawheart** ([mtsids.com](http://mtsids.com/)), *Animals and Tea* | [CC-BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [OpenGameArt](https://opengameart.org/content/animals-and-tea-by-strawheart) |
-| Puppy sounds: `widgets/osampo/sounds/wouf.wav`, `aboie.wav`, `gemit.wav` | **AntumDeluge** | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [Freesound #583142](https://freesound.org/s/583142/) |
+| Front-facing puppy poses: `widgets/osampo/ui/sprites/` `repos.png`, `patte.png`, `content.png`, `aboie.png`, `boude.png`, `tournis.png`, `laisse.png`, `lache.png`, `bain.png`, `bain_mousse.png`, `bain_fin.png`, `os.png`, `os_fin.png`; the contact sheet `widgets/osampo/tools/planche_contact.png`; the demo clips in `docs/media/` that show them; the original `widgets/osampo/assets/third_party/strawheart_animals_and_tea/pixel-ani-dog.gif`; their copy in `claude-mod/hooks/sprites.gen.ts`, `claude-mod/.claude-plugin/icon.png` and `docs/media/claude-mod.webp` | **strawheart** ([mtsids.com](http://mtsids.com/)), *Animals and Tea* | [CC-BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [OpenGameArt](https://opengameart.org/content/animals-and-tea-by-strawheart) |
+| Puppy sounds: `widgets/osampo/sounds/wouf.wav`, `aboie.wav`, `gemit.wav`; copies in `claude-mod/assets/` | **AntumDeluge** | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [Freesound #583142](https://freesound.org/s/583142/) |
 | All other sprites (side-view puppy, walk/trot/gallop cycles, kennel, backgrounds, icons), tray icons in `crates/osampo-pc/icons/`, the synthesized yap `widgets/osampo/sounds/jappe.wav` | Osampo contributors | MIT | drawn in code: `widgets/osampo/tools/gen_assets.py`, `crates/osampo-pc/tools/gen_icones.py` |
 
 The front-facing poses are **derivative works** of strawheart's puppy and stay under
@@ -53,7 +53,8 @@ Le **code source** d'Osampo est sous [licence MIT](LICENSE). Certains **dessins*
 **bibliothèque d'interface** ont leur propre licence :
 
 - **Poses de face du chiot** (13 planches listées plus haut, la planche de contact et le GIF
-  d'origine) : dérivées du chiot de **strawheart** ([mtsids.com](http://mtsids.com/)),
+  d'origine, leur copie dans `claude-mod/hooks/sprites.gen.ts`, `claude-mod/.claude-plugin/icon.png` et
+  `docs/media/claude-mod.webp`) : dérivées du chiot de **strawheart** ([mtsids.com](http://mtsids.com/)),
   *Animals and Tea*, sous [CC-BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/).
   Réutilisables en citant strawheart et en partageant les modifications sous la même licence.
 - **Sons** : enregistrement de **AntumDeluge** sur

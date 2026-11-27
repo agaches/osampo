@@ -1,0 +1,14 @@
+{
+  "name": "osampo",
+  "owner": {
+    "name": "agaches"
+  },
+  "description": "Osampo, the walk-reminding puppy, as a Claude Code mod",
+  "plugins": [
+    {
+      "name": "osampo",
+      "source": "./claude-mod",
+      "description": "The Osampo puppy in a panel beside Claude Code: walks, reminders, a paw when Claude waits"
+    }
+  ]
+}

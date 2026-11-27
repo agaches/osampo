@@ -30,6 +30,11 @@ le même chien est posé sur ta barre des tâches.
 
 *Enregistré avec le simulateur desktop (`tools/demos.py`). Clips plus longs : `docs/media/*.mp4`.*
 
+**Pas de board ? Le même chiot vit dans Claude Code.** Un panneau à côté du chat, dessiné avec
+les sprites de la board ([installer](#mod-claude-code)) :
+
+<img src="docs/media/claude-mod.webp" alt="Claude Code avec le panneau Osampo à droite : Claude répond et le chiot donne la patte, puis balle, bain, os, roulade et départ en promenade" width="800">
+
 ## L'idée
 
 Osampo est un petit compagnon qui a ses propres besoins :
@@ -140,10 +145,33 @@ connecter à la board, lui envoyer des commandes ou l'occuper pour que ton PC ne
 - **Claude Code :** ajouter le hook dans `~/.claude/settings.json` pour que le chiot sache
   quand Claude t'attend. Le JSON exact est dans [`daemon/hooks/README.md`](daemon/hooks/README.md).
 
+## Mod Claude Code
+
+Le chiot dans un panneau à côté du chat de Claude Code, sans board ni daemon. L'installer depuis
+une session Claude Code :
+
+```
+/plugin install osampo --marketplace agaches/osampo
+```
+
+Répondre `y` pour ajouter le marketplace, puis choisir une portée. Depuis un shell :
+`claude plugin install osampo --marketplace agaches/osampo`.
+
+- Le panneau s'ouvre tout seul dans un terminal d'au moins 144 colonnes ; `/osampo` l'ouvre à
+  toute largeur. Plus étroit, le chiot garde une ligne au-dessus du prompt.
+- Il réclame sa promenade après 90 minutes de travail et aux heures des rappels, lève la patte
+  quand Claude t'attend, aboie au bout de 2 minutes et dort la nuit. Mêmes valeurs que la board.
+- Il prend les valeurs par défaut et ne lit pas ta config : `~/.config/osampo/osampo.toml`
+  (rappels personnalisés, `seuil_reclame`, `retour_min`) ne le change pas.
+- Boutons, ou `/osampo walk | snooze | pet | ball | bone | brush | hide | show`.
+- Il tourne seul : il ne parle ni au daemon ni à la board. Pour eux, garder le hook ci-dessus.
+- Développer : `claude --plugin-dir claude-mod` ; tests : `claude plugin test claude-mod` ;
+  sprites : `python3 -I claude-mod/tools/gen_sprites.py`.
+
 ## Développer
 
 ```sh
-tests/run_all.sh                         # Rust, C++, installeur, données personnelles, acceptance
+tests/run_all.sh                         # Rust, C++, installeur, données personnelles, mod Claude Code, acceptance
 cmake -B widgets/osampo/desktop/build -S widgets/osampo/desktop    # CMake, compilateur C++
 cmake --build widgets/osampo/desktop/build
 widgets/osampo/desktop/build/osampo --fake    # le chiot dans une fenêtre, données factices
