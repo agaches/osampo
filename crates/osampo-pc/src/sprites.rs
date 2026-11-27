@@ -10,7 +10,8 @@ pub const CASE: usize = 64;
 /// Les animations dont la fenêtre a besoin. `mange` n'a pas de planche à lui : le widget joue
 /// `os` (il mâche) puis `os_fin` (il se lèche les babines). `Dort` est `dort.png` devant
 /// `niche.png` ; `Laisse` est `laisse_icone.png` seule (une case, sans chien) ; `ReclameLaisse`
-/// est `laisse.png`, le chien qui tient la laisse (la planche de la board).
+/// est `laisse.png`, le chien qui tient la laisse (la planche de la board). Le bain enchaîne
+/// `bain` (brossage), `bain_mousse` et `bain_fin`, comme le widget.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Anim {
     Repos,
@@ -22,6 +23,9 @@ pub enum Anim {
     OsFin,
     Laisse,
     ReclameLaisse,
+    Bain,
+    BainMousse,
+    BainFin,
 }
 
 impl Anim {
@@ -36,6 +40,7 @@ impl Anim {
             Anim::Os | Anim::OsFin => "os",
             Anim::Laisse => "laisse",
             Anim::ReclameLaisse => "reclame_laisse",
+            Anim::Bain | Anim::BainMousse | Anim::BainFin => "bain",
         }
     }
 }
@@ -53,6 +58,9 @@ pub struct Sprites {
     content: Vec<Case>,
     os: Vec<Case>,
     os_fin: Vec<Case>,
+    bain: Vec<Case>,
+    bain_mousse: Vec<Case>,
+    bain_fin: Vec<Case>,
 }
 
 impl Sprites {
@@ -87,6 +95,15 @@ impl Sprites {
                 "os_fin",
                 include_bytes!("../../../widgets/osampo/ui/sprites/os_fin.png"),
             )?,
+            bain: dir("bain", include_bytes!("../../../widgets/osampo/ui/sprites/bain.png"))?,
+            bain_mousse: dir(
+                "bain_mousse",
+                include_bytes!("../../../widgets/osampo/ui/sprites/bain_mousse.png"),
+            )?,
+            bain_fin: dir(
+                "bain_fin",
+                include_bytes!("../../../widgets/osampo/ui/sprites/bain_fin.png"),
+            )?,
         })
     }
 
@@ -101,6 +118,9 @@ impl Sprites {
             Anim::Content => &self.content,
             Anim::Os => &self.os,
             Anim::OsFin => &self.os_fin,
+            Anim::Bain => &self.bain,
+            Anim::BainMousse => &self.bain_mousse,
+            Anim::BainFin => &self.bain_fin,
         }
     }
 
@@ -246,6 +266,9 @@ mod tests {
         assert_eq!(s.compte(Anim::Content), 6);
         assert_eq!(s.compte(Anim::Os), 8);
         assert_eq!(s.compte(Anim::OsFin), 8);
+        assert_eq!(s.compte(Anim::Bain), 12); // bain.png : 768 de large
+        assert_eq!(s.compte(Anim::BainMousse), 8);
+        assert_eq!(s.compte(Anim::BainFin), 8);
         assert_eq!(s.case(Anim::Aboie, 3).len(), CASE * CASE * 4);
         // une image ne reste pas vide : il y a du chien dedans
         assert!(s.case(Anim::Aboie, 0).chunks(4).any(|p| p[3] == 255));
@@ -321,6 +344,9 @@ mod tests {
         assert_eq!(Anim::OsFin.nom(), "os");
         assert_eq!(Anim::Laisse.nom(), "laisse");
         assert_eq!(Anim::ReclameLaisse.nom(), "reclame_laisse");
+        for a in [Anim::Bain, Anim::BainMousse, Anim::BainFin] {
+            assert_eq!(a.nom(), "bain");
+        }
     }
 
     #[test]

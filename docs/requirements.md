@@ -90,10 +90,10 @@ sans prendre le focus du clavier, et aucune autre fenêtre du chien n'apparaît 
 est accepté ou reporté (sur le PC ou sur la board), il revient à l'état du chiot, sans
 disparaître.
 
-### REQ-006 : chatouiller et donner un os depuis le PC
+### REQ-006 : chatouiller, donner un os ou un bain depuis le PC
 
-Depuis le PC (menu de l'icône ou fenêtre du chien), on peut chatouiller le chien ou lui donner
-un os.
+Depuis le PC (menu de l'icône ou fenêtre du chien), on peut chatouiller le chien, lui donner
+un os ou un bain (la brosse de la board).
 
 Critère : le chien du PC réagit (sprite et son) ; la commande est envoyée à la board par le
 daemon et la board joue la même réaction qu'un geste fait sur elle, en moins de 5 s si le lien
@@ -167,6 +167,16 @@ patte à l'aboiement en moins de 5 s après la board.
 De même, pendant une réclamation en laisse (rappel sortie, sport, dodo, jauge vide), chaque
 relance fait passer la board à la pose « aboie » quelques secondes (son compris), puis elle
 reprend la laisse ; le chien du PC suit (ADR-007).
+
+### REQ-013 : quitter Osampo depuis le PC
+
+Le menu de l'icône (et donc celui du chien, REQ-011) se termine par « Quitter Osampo », toujours
+cliquable, même daemon injoignable.
+
+Critère : le clic arrête le daemon puis `osampo-pc` (icône et chien disparaissent) en moins de
+5 s ; le socket du daemon est supprimé et le daemon sort en code 0, donc l'unité systemd
+(`Restart=on-failure`) ne le relance pas ; tout repart à la prochaine ouverture de session.
+Daemon injoignable : `osampo-pc` quitte quand même.
 
 ## Hors périmètre
 

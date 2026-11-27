@@ -28,6 +28,8 @@ pub enum Reaction {
     Content,
     /// Après `Donner un os`.
     Mange,
+    /// Après `Donner un bain`.
+    Bain,
 }
 
 /// L'état du chiot vu par la fenêtre, d'après l'`icone` de la ligne d'état (SPEC-002).
@@ -72,7 +74,7 @@ const SEUIL_GLISSE: i32 = 4;
 const ALPHA_DECOUPE: u8 = 128;
 /// Fond uni quand rien ne compose et que Shape manque (fond de la bulle du widget).
 const FOND_UNI: [u8; 3] = [253, 253, 246];
-const TOUTES: [Anim; 9] = [
+const TOUTES: [Anim; 12] = [
     Anim::Repos,
     Anim::Dort,
     Anim::Aboie,
@@ -82,6 +84,9 @@ const TOUTES: [Anim; 9] = [
     Anim::OsFin,
     Anim::Laisse,
     Anim::ReclameLaisse,
+    Anim::Bain,
+    Anim::BainMousse,
+    Anim::BainFin,
 ];
 
 // --- ce qui se voit -----------------------------------------------------------------------
@@ -113,6 +118,10 @@ fn suite(f: Famille) -> &'static [Anim] {
         Famille::ReclameLaisse => &[Anim::ReclameLaisse],
         Famille::Reaction(Reaction::Content) => &[Anim::Content],
         Famille::Reaction(Reaction::Mange) => &[Anim::Os, Anim::OsFin],
+        // ponytail: mousse en boucle 3 fois (6 sur la board), un bain plus court sur le PC
+        Famille::Reaction(Reaction::Bain) => {
+            &[Anim::Bain, Anim::BainMousse, Anim::BainMousse, Anim::BainMousse, Anim::BainFin]
+        }
         Famille::Dort => &[Anim::Dort],
         Famille::Laisse => &[Anim::Laisse],
         Famille::Repos => &[Anim::Repos],
@@ -788,7 +797,7 @@ fn boucle(rx: mpsc::Receiver<Ordre>, cote: u16, actions: UnboundedSender<Action>
         }
     };
     // les nombres de cases sont ceux des planches embarquées, lus une fois
-    static COMPTES: std::sync::OnceLock<[usize; 9]> = std::sync::OnceLock::new();
+    static COMPTES: std::sync::OnceLock<[usize; 12]> = std::sync::OnceLock::new();
     let _ = COMPTES.set(TOUTES.map(|a| sprites.compte(a)));
     fn compte(a: Anim) -> usize {
         COMPTES.get().map_or(1, |c| c[a as usize])
@@ -870,7 +879,20 @@ mod tests {
             Anim::Dort => 4,
             Anim::Laisse => 1,
             Anim::ReclameLaisse => 4,
+            Anim::Bain => 12,
+            Anim::BainMousse | Anim::BainFin => 8,
         }
+    }
+
+    #[test]
+    fn bain_brosse_mousse_puis_fin() {
+        let mut m = Machine::new(compte);
+        m.reaction(Reaction::Bain, s(0));
+        assert_eq!(m.vue(s(0)), Vue { anim: Anim::Bain, case: 0 });
+        assert_eq!(m.vue(s(150 * 12)), Vue { anim: Anim::BainMousse, case: 0 });
+        assert_eq!(m.vue(s(150 * (12 + 8))), Vue { anim: Anim::BainMousse, case: 0 });
+        assert_eq!(m.vue(s(150 * (12 + 24))), Vue { anim: Anim::BainFin, case: 0 });
+        assert_eq!(m.vue(s(150 * (12 + 24 + 8))), Vue { anim: Anim::Repos, case: 0 });
     }
 
     fn s(ms: u64) -> Duration {

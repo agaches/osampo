@@ -58,6 +58,7 @@ fn reaction_board(avant: &Vue, apres: &Etat) -> Option<Reaction> {
     match geste.geste.as_str() {
         "chatouille" => Some(Reaction::Content),
         "os" => Some(Reaction::Mange),
+        "bain" => Some(Reaction::Bain),
         _ => None,
     }
 }
@@ -85,6 +86,12 @@ const OS: Geste = Geste {
     cmd: "os",
     reaction: Reaction::Mange,
     non_transmis: "Board hors ligne : os non transmis",
+};
+
+const BAIN: Geste = Geste {
+    cmd: "bain",
+    reaction: Reaction::Bain,
+    non_transmis: "Board hors ligne : bain non transmis",
 };
 
 /// Suite d'une commande de geste : à faire une fois la réponse du daemon reçue.
@@ -188,10 +195,14 @@ async fn main() {
                 }
             }
             a = act_rx.recv() => match a {
+                Some(Action::Quitter) => break quitter(&cmd_tx).await,
                 Some(a) => executer(a, rappel.as_ref(), &cmd_tx, &suite_tx, &mut reglages),
                 None => break,
             },
             Some(a) = chien_rx.recv() => {
+                if a == Action::Quitter {
+                    break quitter(&cmd_tx).await;
+                }
                 if permise(&vue, a) {
                     executer(a, rappel.as_ref(), &cmd_tx, &suite_tx, &mut reglages);
                 }
@@ -247,8 +258,10 @@ fn executer(
         Action::Reglages => lancer_reglages(reglages),
         Action::Chatouille => envoyer_geste(&CHATOUILLE, cmd_tx, suite_tx),
         Action::Os => envoyer_geste(&OS, cmd_tx, suite_tx),
+        Action::Bain => envoyer_geste(&BAIN, cmd_tx, suite_tx),
         Action::Remplir => regler_jauge(100, cmd_tx),
         Action::Vider => regler_jauge(0, cmd_tx),
+        Action::Quitter => {} // traité par la boucle principale : il faut en sortir
         // Même commande que les boutons de la notification ; le daemon retire ensuite le rappel.
         Action::Accepter | Action::Reporter => {
             let Some(r) = rappel else { return };
@@ -256,6 +269,21 @@ fn executer(
             let (tx, _) = oneshot::channel();
             let _ = cmd_tx.send((ligne_commande(cmd, Some(&r.id)), tx));
         }
+    }
+}
+
+/// Délai laissé au daemon pour répondre à `quitter` ; injoignable, on quitte quand même.
+const ATTENTE_QUITTER: Duration = Duration::from_secs(2);
+
+/// Menu « Quitter Osampo » : demande au daemon de s'arrêter, puis rend la main pour que
+/// `osampo-pc` sorte.
+async fn quitter(cmd_tx: &mpsc::UnboundedSender<client::Commande>) {
+    let (tx, rx) = oneshot::channel();
+    let _ = cmd_tx.send((ligne_commande("quitter", None), tx));
+    match tokio::time::timeout(ATTENTE_QUITTER, rx).await {
+        Ok(Ok(Ok(()))) => {}
+        Ok(Ok(Err(e))) => eprintln!("osampo-pc : arrêt du daemon : {e}"),
+        _ => eprintln!("osampo-pc : daemon sans réponse à quitter"),
     }
 }
 
@@ -324,6 +352,7 @@ mod tests {
             Some(Reaction::Content)
         );
         assert_eq!(reaction_board(&avant, &apres(Some(("os", "board", "14:14")))), Some(Reaction::Mange));
+        assert_eq!(reaction_board(&avant, &apres(Some(("bain", "board", "14:17")))), Some(Reaction::Bain));
         // geste du PC : déjà joué (SPEC-006)
         assert_eq!(reaction_board(&avant, &apres(Some(("os", "pc", "14:15")))), None);
         // geste inconnu, aucun geste

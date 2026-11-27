@@ -272,7 +272,7 @@ def test_req011_patte_de_la_board_pendant_le_rappel(monde, xvfb):
 
 
 # REQ-011 : os / chatouille faits sur la board : la fenêtre joue la réaction, sans son
-@pytest.mark.parametrize("evt,anim", [("os", "os"), ("chatouille", "content")])
+@pytest.mark.parametrize("evt,anim", [("os", "os"), ("chatouille", "content"), ("bain", "bain")])
 def test_req011_geste_de_la_board(monde, xvfb, evt, anim):
     m = monde(pc=True)
     _pret(m)
@@ -384,7 +384,7 @@ def test_req011_clic_droit_menu_identique_a_celui_de_l_icone(monde, xvfb):
     i = textes.index("-")
     assert textes[i + 1:i + 3] == ["Chatouiller", "Donner un os"]
     assert "Remplir la jauge" in textes and "Vider la jauge" in textes
-    assert textes[-1] == "Réglages…"
+    assert textes[-2:] == ["Réglages…", "Quitter Osampo"]
 
 
 # REQ-011 : le menu : sans bord, override-redirect, WM_CLASS OsampoMenu, entièrement à l'écran
@@ -409,7 +409,7 @@ def _clic_entree(xvfb, mw, e):
 
 
 # REQ-011 : une entrée active : son effet, puis le menu se ferme
-@pytest.mark.parametrize("texte,cmd", [("Chatouiller", "chatouille"), ("Donner un os", "os")])
+@pytest.mark.parametrize("texte,cmd", [("Chatouiller", "chatouille"), ("Donner un os", "os"), ("Donner un bain", "bain")])
 def test_req011_menu_entree_active(monde, xvfb, texte, cmd):
     m = monde(pc=True)
     _pret(m)

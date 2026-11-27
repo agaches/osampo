@@ -462,6 +462,7 @@ std::optional<Need> Pup::input(Input in, int64_t mono_s)
     case Input::Brosse: // icone brosse : bain (SP5e)
         state_ = State::Bain;
         pending_ = Cue::Jappe;
+        emettre(EvtKind::Bain);
         return Need::Jouer;
     case Input::Os: // icone os : il croque un os (SP5f), friandise
         state_ = State::Mange;

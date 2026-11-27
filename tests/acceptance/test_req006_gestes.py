@@ -6,7 +6,7 @@ import pytest
 
 from outils import attendre, config_toml, hhmm, maintenant
 
-GESTES = [("chatouille", "Chatouiller"), ("os", "Donner un os")]
+GESTES = [("chatouille", "Chatouiller"), ("os", "Donner un os"), ("bain", "Donner un bain")]
 
 
 # REQ-006 : la commande est relayee a la board, qui rejoue le meme geste, en moins de 5 s
@@ -71,6 +71,7 @@ def test_req006_commande_inconnue(monde):
 
 
 # REQ-006 : menu de l'icone : statuts, separateur, puis Chatouiller, Donner un os, ..., Réglages…
+# (REQ-013 ajoute « Quitter Osampo » en dernier)
 # (SPEC-004 ; SPEC-009 insere les entrees de la jauge avant Réglages…, verifiees par REQ-009)
 def test_req006_menu_de_l_icone(monde):
     m = monde(pc=True)
@@ -83,7 +84,7 @@ def test_req006_menu_de_l_icone(monde):
     actions = e[i + 1:]
     noms = [x["label"] for x in actions]
     assert noms[:2] == ["Chatouiller", "Donner un os"], labels
-    assert noms[-1] == "Réglages…", labels
+    assert noms[-2:] == ["Réglages…", "Quitter Osampo"], labels
     assert all(x["enabled"] for x in actions)
 
 
@@ -95,7 +96,7 @@ def test_req006_menu_envoie_la_commande_et_le_chien_reagit(monde, xvfb, cmd, lab
     item = m.item()
     m.board.etat(etat="repos")
     m.client.attendre_etat(lambda e: e["etat"] == "repos", 3)
-    reaction = {"chatouille": "content", "os": "os"}[cmd]
+    reaction = {"chatouille": "content", "os": "os", "bain": "bain"}[cmd]
     w = attendre(lambda: (xvfb.visibles() or [None])[0], 3, msg="fenetre du chien (permanente)")
     item.cliquer(label)
     attendre(lambda: xvfb.anim(w) == reaction, 3, pas=0.02,
@@ -115,7 +116,7 @@ def test_req006_menu_lien_coupe(monde, xvfb, cmd, label, texte):
     m = monde(pc=True, board=False)
     item = m.item()
     attendre(lambda: any(e["label"] == label and e["enabled"] for e in item.entrees()), 5)
-    reaction = {"chatouille": "content", "os": "os"}[cmd]
+    reaction = {"chatouille": "content", "os": "os", "bain": "bain"}[cmd]
     w = attendre(lambda: (xvfb.visibles() or [None])[0], 3, msg="fenetre du chien (permanente)")
     item.cliquer(label)
     attendre(lambda: xvfb.anim(w) == reaction, 3, pas=0.02,

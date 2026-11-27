@@ -8,7 +8,7 @@ from outils import attendre, config_toml, hhmm, id_rappel, ligne_etat, maintenan
 
 
 # REQ-007 : un os ou une chatouille faits sur la board se reflètent sur le PC en moins de 5 s
-@pytest.mark.parametrize("evt", ["os", "chatouille"])
+@pytest.mark.parametrize("evt", ["os", "chatouille", "bain"])
 def test_req007_geste_de_la_board(monde, evt):
     m = monde()
     m.board.evenement(evt, source="board")

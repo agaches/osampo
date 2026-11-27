@@ -381,6 +381,6 @@ mod tests {
         let p = propriete(&en, &d);
         assert_eq!(p.lines().count(), en.len());
         assert!(p.lines().any(|l| l.ends_with("\t-")));
-        assert!(p.lines().last().unwrap().ends_with("\t1\tRéglages…"));
+        assert!(p.lines().last().unwrap().ends_with("\t1\tQuitter Osampo"));
     }
 }

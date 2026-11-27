@@ -34,6 +34,7 @@ const char *kind_name(EvtKind k)
     switch (k) {
     case EvtKind::Os: return "os";
     case EvtKind::Chatouille: return "chatouille";
+    case EvtKind::Bain: return "bain";
     case EvtKind::Accepte: return "accepte";
     case EvtKind::Reporte: return "reporte";
     case EvtKind::Abandonne: return "abandonne";
@@ -69,7 +70,7 @@ std::string ligne_etat(const EtatBoard &e)
 std::string ligne_evenement(const Evenement &e)
 {
     std::string s = std::string("{\"evt\":\"") + kind_name(e.kind) + "\"";
-    if (e.kind == EvtKind::Os || e.kind == EvtKind::Chatouille)
+    if (e.kind == EvtKind::Os || e.kind == EvtKind::Chatouille || e.kind == EvtKind::Bain)
         s += ",\"source\":\"" + e.source + "\"";
     else
         s += ",\"rappel\":\"" + e.rappel + "\"";
@@ -89,6 +90,7 @@ std::optional<Commande> lire_commande(const std::string &ligne)
     const std::string cmd = j.text("cmd", "");
     if (cmd == "chatouille") return Commande{Commande::Kind::Chatouille, ""};
     if (cmd == "os") return Commande{Commande::Kind::Os, ""};
+    if (cmd == "bain") return Commande{Commande::Kind::Bain, ""};
     const std::string rappel = j.text("rappel", "");
     if (rappel.empty()) return std::nullopt;
     if (cmd == "accepter") return Commande{Commande::Kind::Accepter, rappel};

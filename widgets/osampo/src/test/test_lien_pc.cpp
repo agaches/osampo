@@ -47,6 +47,7 @@ void lignes_d_evenement()
 {
     assert(pup::ligne_evenement({EvtKind::Os, "board", ""}) == "{\"evt\":\"os\",\"source\":\"board\"}");
     assert(pup::ligne_evenement({EvtKind::Chatouille, "pc", ""}) == "{\"evt\":\"chatouille\",\"source\":\"pc\"}");
+    assert(pup::ligne_evenement({EvtKind::Bain, "board", ""}) == "{\"evt\":\"bain\",\"source\":\"board\"}");
     assert(pup::ligne_evenement({EvtKind::Accepte, "", "sortie,1230"}) ==
            "{\"evt\":\"accepte\",\"rappel\":\"sortie,1230\"}");
     assert(pup::ligne_evenement({EvtKind::Reporte, "", "promenade"}) ==
@@ -61,6 +62,8 @@ void lecture_des_commandes()
     assert(c && c->kind == Commande::Kind::Chatouille);
     c = pup::lire_commande("{\"cmd\":\"os\"}");
     assert(c && c->kind == Commande::Kind::Os);
+    c = pup::lire_commande("{\"cmd\":\"bain\"}");
+    assert(c && c->kind == Commande::Kind::Bain);
     c = pup::lire_commande("{\"cmd\":\"accepter\",\"rappel\":\"sortie,1230\"}");
     assert(c && c->kind == Commande::Kind::Accepter && c->rappel == "sortie,1230");
     c = pup::lire_commande("{\"cmd\":\"reporter\",\"rappel\":\"promenade\"}");

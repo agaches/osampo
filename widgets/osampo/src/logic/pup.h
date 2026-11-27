@@ -18,8 +18,8 @@ enum class Reason { None, Rappel, Promenade, Claude };
 enum class Input { Tap, LongPress, Stroke, Throw, Shake, FaceDown, FaceUp, AnimDone, Brosse, Os, Laisse };
 
 // Evenement a remonter au PC (SPEC-001). rappel : le rappel sortie / sport / dodo concerne ;
-// absent pour Accepte / Reporte = reclamation de la jauge (promenade). Os et Chatouille : sans rappel.
-enum class EvtKind { Os, Chatouille, Accepte, Reporte, Abandonne };
+// absent pour Accepte / Reporte = reclamation de la jauge (promenade). Os, Chatouille, Bain : sans rappel.
+enum class EvtKind { Os, Chatouille, Bain, Accepte, Reporte, Abandonne };
 struct Evt {
     EvtKind kind;
     std::optional<Reminder> rappel;

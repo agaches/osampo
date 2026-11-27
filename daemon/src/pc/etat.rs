@@ -70,6 +70,13 @@ fn hhmm_de_id(id: &str) -> String {
     }
 }
 
+/// Commande `quitter` (menu « Quitter Osampo ») : le daemon repond `ok` puis s arrete.
+pub fn demande_l_arret(ligne: &str) -> bool {
+    serde_json::from_str::<Value>(ligne)
+        .ok()
+        .is_some_and(|v| v.get("cmd").and_then(Value::as_str) == Some("quitter"))
+}
+
 fn reponse(nom: &str, erreur: Option<&str>) -> String {
     match erreur {
         None => json!({"reponse": nom, "ok": true}),
@@ -247,7 +254,7 @@ impl EtatPc {
 
     fn evenement(&mut self, evt: &str, v: &Value, now: Heure) {
         match evt {
-            "os" | "chatouille" => {
+            "os" | "chatouille" | "bain" => {
                 let source = v.get("source").and_then(Value::as_str).unwrap_or("board");
                 self.dernier_geste = Some(Geste {
                     geste: evt.into(),
@@ -312,8 +319,12 @@ impl EtatPc {
             return inconnue();
         };
         match v.get("cmd").and_then(Value::as_str) {
-            Some(c @ ("chatouille" | "os")) => {
-                let nom = if c == "os" { "os" } else { "chatouille" };
+            Some(c @ ("chatouille" | "os" | "bain")) => {
+                let nom = match c {
+                    "os" => "os",
+                    "bain" => "bain",
+                    _ => "chatouille",
+                };
                 if !self.connecte {
                     return (reponse(nom, Some("board hors ligne")), vec![]);
                 }
@@ -359,6 +370,7 @@ impl EtatPc {
                     (reponse(nom, None), vec![])
                 }
             }
+            Some("quitter") => (reponse("quitter", None), vec![]),
             _ => inconnue(),
         }
     }
@@ -619,6 +631,15 @@ mod tests {
         assert_eq!(pub_(&p, n)["dernier_geste"], json!({"geste": "os", "source": "pc", "heure": "14:12"}));
         p.ligne_board(r#"{"evt":"chatouille","source":"board"}"#, dim(14, 20));
         assert_eq!(pub_(&p, n)["dernier_geste"], json!({"geste": "chatouille", "source": "board", "heure": "14:20"}));
+        let (r, l) = p.commande(r#"{"cmd":"bain"}"#, dim(14, 21));
+        assert_eq!(r, r#"{"ok":true,"reponse":"bain"}"#);
+        assert_eq!(l, vec![r#"{"cmd":"bain"}"#]);
+        assert_eq!(pub_(&p, n)["dernier_geste"], json!({"geste": "bain", "source": "pc", "heure": "14:21"}));
+        p.ligne_board(r#"{"evt":"bain","source":"board"}"#, dim(14, 22));
+        assert_eq!(pub_(&p, n)["dernier_geste"], json!({"geste": "bain", "source": "board", "heure": "14:22"}));
+        p.ligne_board(&etat("promenade", "-", "-"), n);
+        let (r, _) = p.commande(r#"{"cmd":"bain"}"#, n);
+        assert!(r.contains("le chiot ne peut pas jouer maintenant"), "{r}");
         for l in ["n importe quoi", r#"{"cmd":"danse"}"#, r#"{"cmd":"accepter"}"#] {
             let (r, l) = p.commande(l, n);
             assert_eq!(r, r#"{"erreur":"commande inconnue","ok":false,"reponse":"?"}"#);
@@ -827,5 +848,19 @@ mod tests {
         p.lien(true);
         let (r, _) = rep(&mut p, r#"{"cmd":"jauge","valeur":7}"#);
         assert_eq!(r["ok"], true);
+    }
+
+    /// Menu « Quitter Osampo » : `quitter` repond `ok`, sans rien pour la board, et
+    /// seule cette commande demande l arret.
+    #[test]
+    fn commande_quitter() {
+        let mut p = pc("");
+        let (r, a_ecrire) = p.commande(r#"{"cmd":"quitter"}"#, dim(10, 0));
+        assert_eq!(serde_json::from_str::<Value>(&r).unwrap(), json!({"reponse": "quitter", "ok": true}));
+        assert!(a_ecrire.is_empty());
+        assert!(demande_l_arret(r#"{"cmd":"quitter"}"#));
+        for l in [r#"{"cmd":"os"}"#, r#"{"quitter":1}"#, "quitter", ""] {
+            assert!(!demande_l_arret(l), "{l}");
+        }
     }
 }

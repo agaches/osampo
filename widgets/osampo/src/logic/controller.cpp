@@ -143,7 +143,7 @@ void Controller::recolter(const char *source)
 {
     for (const Evt &e : pup_.take_events()) {
         Evenement v{e.kind, "", e.rappel ? id_rappel(*e.rappel) : ""};
-        if (e.kind == EvtKind::Os || e.kind == EvtKind::Chatouille) v.source = source;
+        if (e.kind == EvtKind::Os || e.kind == EvtKind::Chatouille || e.kind == EvtKind::Bain) v.source = source;
         else if (e.kind != EvtKind::Abandonne && !e.rappel) v.rappel = "promenade"; // jauge
         events_.push_back(std::move(v));
     }
@@ -162,6 +162,7 @@ void Controller::on_command(const Commande &c, int64_t mono_s)
     switch (c.kind) {
     case Commande::Kind::Chatouille: entree(Input::Stroke, mono_s, "pc"); return;
     case Commande::Kind::Os: entree(Input::Os, mono_s, "pc"); return;
+    case Commande::Kind::Bain: entree(Input::Brosse, mono_s, "pc"); return;
     case Commande::Kind::Accepter:
     case Commande::Kind::Reporter: break;
     }
