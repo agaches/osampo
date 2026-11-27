@@ -70,6 +70,13 @@ fn hhmm_de_id(id: &str) -> String {
     }
 }
 
+/// Commande `quitter` (menu « Quitter Osampo ») : le daemon repond `ok` puis s arrete.
+pub fn demande_l_arret(ligne: &str) -> bool {
+    serde_json::from_str::<Value>(ligne)
+        .ok()
+        .is_some_and(|v| v.get("cmd").and_then(Value::as_str) == Some("quitter"))
+}
+
 fn reponse(nom: &str, erreur: Option<&str>) -> String {
     match erreur {
         None => json!({"reponse": nom, "ok": true}),
@@ -359,6 +366,7 @@ impl EtatPc {
                     (reponse(nom, None), vec![])
                 }
             }
+            Some("quitter") => (reponse("quitter", None), vec![]),
             _ => inconnue(),
         }
     }
@@ -827,5 +835,19 @@ mod tests {
         p.lien(true);
         let (r, _) = rep(&mut p, r#"{"cmd":"jauge","valeur":7}"#);
         assert_eq!(r["ok"], true);
+    }
+
+    /// Menu « Quitter Osampo » : `quitter` repond `ok`, sans rien pour la board, et
+    /// seule cette commande demande l arret.
+    #[test]
+    fn commande_quitter() {
+        let mut p = pc("");
+        let (r, a_ecrire) = p.commande(r#"{"cmd":"quitter"}"#, dim(10, 0));
+        assert_eq!(serde_json::from_str::<Value>(&r).unwrap(), json!({"reponse": "quitter", "ok": true}));
+        assert!(a_ecrire.is_empty());
+        assert!(demande_l_arret(r#"{"cmd":"quitter"}"#));
+        for l in [r#"{"cmd":"os"}"#, r#"{"quitter":1}"#, "quitter", ""] {
+            assert!(!demande_l_arret(l), "{l}");
+        }
     }
 }

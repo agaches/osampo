@@ -168,6 +168,16 @@ De même, pendant une réclamation en laisse (rappel sortie, sport, dodo, jauge 
 relance fait passer la board à la pose « aboie » quelques secondes (son compris), puis elle
 reprend la laisse ; le chien du PC suit (ADR-007).
 
+### REQ-013 : quitter Osampo depuis le PC
+
+Le menu de l'icône (et donc celui du chien, REQ-011) se termine par « Quitter Osampo », toujours
+cliquable, même daemon injoignable.
+
+Critère : le clic arrête le daemon puis `osampo-pc` (icône et chien disparaissent) en moins de
+5 s ; le socket du daemon est supprimé et le daemon sort en code 0, donc l'unité systemd
+(`Restart=on-failure`) ne le relance pas ; tout repart à la prochaine ouverture de session.
+Daemon injoignable : `osampo-pc` quitte quand même.
+
 ## Hors périmètre
 
 - Wayland (le PC est en X11 / Cinnamon).

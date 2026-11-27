@@ -144,7 +144,8 @@ def test_req009_fichier_d_etat_ecrit_tout_de_suite(monde):
 
 
 # ------------------------------------------------------------------ menu de l'icone
-ENTREES = ["Chatouiller", "Donner un os", "Remplir la jauge", "Vider la jauge", "Réglages…"]
+ENTREES = ["Chatouiller", "Donner un os", "Remplir la jauge", "Vider la jauge", "Réglages…",
+           "Quitter Osampo"]
 
 
 # REQ-009 : le menu propose Remplir et Vider la jauge entre « Donner un os » et « Réglages… »

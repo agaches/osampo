@@ -71,6 +71,7 @@ def test_req006_commande_inconnue(monde):
 
 
 # REQ-006 : menu de l'icone : statuts, separateur, puis Chatouiller, Donner un os, ..., Réglages…
+# (REQ-013 ajoute « Quitter Osampo » en dernier)
 # (SPEC-004 ; SPEC-009 insere les entrees de la jauge avant Réglages…, verifiees par REQ-009)
 def test_req006_menu_de_l_icone(monde):
     m = monde(pc=True)
@@ -83,7 +84,7 @@ def test_req006_menu_de_l_icone(monde):
     actions = e[i + 1:]
     noms = [x["label"] for x in actions]
     assert noms[:2] == ["Chatouiller", "Donner un os"], labels
-    assert noms[-1] == "Réglages…", labels
+    assert noms[-2:] == ["Réglages…", "Quitter Osampo"], labels
     assert all(x["enabled"] for x in actions)
 
 

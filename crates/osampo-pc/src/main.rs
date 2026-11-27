@@ -188,10 +188,14 @@ async fn main() {
                 }
             }
             a = act_rx.recv() => match a {
+                Some(Action::Quitter) => break quitter(&cmd_tx).await,
                 Some(a) => executer(a, rappel.as_ref(), &cmd_tx, &suite_tx, &mut reglages),
                 None => break,
             },
             Some(a) = chien_rx.recv() => {
+                if a == Action::Quitter {
+                    break quitter(&cmd_tx).await;
+                }
                 if permise(&vue, a) {
                     executer(a, rappel.as_ref(), &cmd_tx, &suite_tx, &mut reglages);
                 }
@@ -249,6 +253,7 @@ fn executer(
         Action::Os => envoyer_geste(&OS, cmd_tx, suite_tx),
         Action::Remplir => regler_jauge(100, cmd_tx),
         Action::Vider => regler_jauge(0, cmd_tx),
+        Action::Quitter => {} // traité par la boucle principale : il faut en sortir
         // Même commande que les boutons de la notification ; le daemon retire ensuite le rappel.
         Action::Accepter | Action::Reporter => {
             let Some(r) = rappel else { return };
@@ -256,6 +261,21 @@ fn executer(
             let (tx, _) = oneshot::channel();
             let _ = cmd_tx.send((ligne_commande(cmd, Some(&r.id)), tx));
         }
+    }
+}
+
+/// Délai laissé au daemon pour répondre à `quitter` ; injoignable, on quitte quand même.
+const ATTENTE_QUITTER: Duration = Duration::from_secs(2);
+
+/// Menu « Quitter Osampo » : demande au daemon de s'arrêter, puis rend la main pour que
+/// `osampo-pc` sorte.
+async fn quitter(cmd_tx: &mpsc::UnboundedSender<client::Commande>) {
+    let (tx, rx) = oneshot::channel();
+    let _ = cmd_tx.send((ligne_commande("quitter", None), tx));
+    match tokio::time::timeout(ATTENTE_QUITTER, rx).await {
+        Ok(Ok(Ok(()))) => {}
+        Ok(Ok(Err(e))) => eprintln!("osampo-pc : arrêt du daemon : {e}"),
+        _ => eprintln!("osampo-pc : daemon sans réponse à quitter"),
     }
 }
 

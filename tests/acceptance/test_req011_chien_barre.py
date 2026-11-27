@@ -384,7 +384,7 @@ def test_req011_clic_droit_menu_identique_a_celui_de_l_icone(monde, xvfb):
     i = textes.index("-")
     assert textes[i + 1:i + 3] == ["Chatouiller", "Donner un os"]
     assert "Remplir la jauge" in textes and "Vider la jauge" in textes
-    assert textes[-1] == "Réglages…"
+    assert textes[-2:] == ["Réglages…", "Quitter Osampo"]
 
 
 # REQ-011 : le menu : sans bord, override-redirect, WM_CLASS OsampoMenu, entièrement à l'écran

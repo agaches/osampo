@@ -17,7 +17,7 @@ use sources::activite::Surcharge;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 use tokio::signal::unix::{signal, SignalKind};
-use tokio::sync::{broadcast, mpsc, watch};
+use tokio::sync::{broadcast, mpsc, oneshot, watch};
 
 /// Capacite du broadcast vers les connexions. Chaque connexion le vide aussitot
 /// dans sa propre file : cette capacite n est pas la borne par client.
@@ -307,6 +307,7 @@ async fn main() -> Result<()> {
     }
     let (etat_tx, etat_rx) = watch::channel(String::new());
     let (cmd_tx, cmd_rx) = mpsc::channel(CAPACITE_COMMANDES_PC);
+    let (quitter_tx, quitter_rx) = oneshot::channel();
     tokio::spawn(tache_pc(
         lien,
         tx.subscribe(),
@@ -316,16 +317,20 @@ async fn main() -> Result<()> {
         etat_tx,
         garde,
         jauge_pc,
+        quitter_tx,
     ));
     let lien_pc = emit::socket::LienPc { etat: etat_rx, commandes: cmd_tx };
     tokio::spawn(emit::socket::serve(listener, dir, rx, cfg, Some(lien_pc)));
 
-    // SIGINT au clavier, SIGTERM pour pkill : les deux suppriment le socket.
+    // SIGINT au clavier, SIGTERM pour pkill, commande `quitter` d un client (menu
+    // « Quitter Osampo ») : tous suppriment le socket. Sortie en code 0 : l unite systemd
+    // (Restart=on-failure) ne relance pas le daemon.
     let mut terme = signal(SignalKind::terminate())?;
     let arret = async move {
         tokio::select! {
             _ = tokio::signal::ctrl_c() => {}
             _ = terme.recv() => {}
+            Ok(()) = quitter_rx => {}
         }
     };
     emettre(planificateur, sources, cadence, tx, arret).await;
@@ -374,7 +379,9 @@ async fn tache_pc(
     publie: watch::Sender<String>,
     _garde: Option<emit::lien_board::CoteTransport>,
     jauge_pc: Option<sources::activite::EmetteurJauge>,
+    quitter: oneshot::Sender<()>,
 ) {
+    let mut quitter = Some(quitter);
     let pour_pc = |r: &config::Reglages| {
         let mut r = r.clone();
         if !a_reglages {
@@ -444,6 +451,13 @@ async fn tache_pc(
                     let _ = lien.commandes.try_send(c);
                 }
                 let _ = retour.send(reponse);
+                if pc::etat::demande_l_arret(&ligne) {
+                    // ponytail: la reponse part avant l arret sans garantie d ecriture ;
+                    // osampo-pc quitte de toute facon.
+                    if let Some(q) = quitter.take() {
+                        let _ = q.send(());
+                    }
+                }
             }
             _ = tic.tick() => {
                 now = maintenant();

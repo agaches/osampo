@@ -1,6 +1,7 @@
 //! Menu `com.canonical.dbusmenu` de l'icône (SPEC-004) : statuts non cliquables, séparateur,
 //! pendant un rappel notifié `Accepter le rappel`, `Reporter N min` et un séparateur, puis
-//! `Chatouiller`, `Donner un os`, `Remplir la jauge`, `Vider la jauge`, `Réglages…`.
+//! `Chatouiller`, `Donner un os`, `Remplir la jauge`, `Vider la jauge`, `Réglages…`,
+//! `Quitter Osampo`.
 //! La liste d'entrées est neutre ([`entrees`]) : le menu du chien (SPEC-011) la reprend.
 
 use ksni::menu::StandardItem;
@@ -21,6 +22,9 @@ pub enum Action {
     /// Comme les boutons de la notification du rappel (SPEC-005), si elle a disparu.
     Accepter,
     Reporter,
+    /// Arrête le daemon puis `osampo-pc` : plus rien n'alimente le chiot jusqu'à la
+    /// prochaine session.
+    Quitter,
 }
 
 /// Une ligne du menu, indépendante du dessin (ksni pour l'icône, X11 pour le chien).
@@ -48,7 +52,7 @@ impl Entree {
 }
 
 /// Les entrées dans l'ordre : statuts non cliquables, séparateur, `Chatouiller`,
-/// `Donner un os`, `Remplir la jauge`, `Vider la jauge`, `Réglages…`.
+/// `Donner un os`, `Remplir la jauge`, `Vider la jauge`, `Réglages…`, `Quitter Osampo`.
 pub fn entrees(vue: &Vue) -> Vec<Entree> {
     let mut m: Vec<Entree> = statuts::lignes(vue).into_iter().map(Entree::statut).collect();
     m.push(Entree::separateur());
@@ -67,6 +71,7 @@ pub fn entrees(vue: &Vue) -> Vec<Entree> {
     m.push(Entree::geste("Remplir la jauge", Action::Remplir, joignable));
     m.push(Entree::geste("Vider la jauge", Action::Vider, joignable));
     m.push(Entree::geste("Réglages…", Action::Reglages, true));
+    m.push(Entree::geste("Quitter Osampo", Action::Quitter, true));
     m
 }
 
@@ -111,8 +116,8 @@ mod tests {
     fn entrees_neutres_dans_l_ordre() {
         let e = entrees(&None);
         let n = e.len();
-        assert!(e[n - 6].separateur);
-        let fin: Vec<_> = e[n - 5..].iter().map(|x| (x.texte.as_str(), x.action, x.actif)).collect();
+        assert!(e[n - 7].separateur);
+        let fin: Vec<_> = e[n - 6..].iter().map(|x| (x.texte.as_str(), x.action, x.actif)).collect();
         assert_eq!(
             fin,
             vec![
@@ -121,9 +126,10 @@ mod tests {
                 ("Remplir la jauge", Some(Action::Remplir), false),
                 ("Vider la jauge", Some(Action::Vider), false),
                 ("Réglages…", Some(Action::Reglages), true),
+                ("Quitter Osampo", Some(Action::Quitter), true),
             ]
         );
-        assert!(e[..n - 6].iter().all(|x| x.action.is_none() && !x.actif && !x.separateur));
+        assert!(e[..n - 7].iter().all(|x| x.action.is_none() && !x.actif && !x.separateur));
     }
 
     fn avec_rappel(categorie: &str, etat: &str) -> Vue {
@@ -165,6 +171,8 @@ mod tests {
         assert_eq!(pos("Remplir la jauge"), pos("Donner un os") + 1);
         assert_eq!(pos("Vider la jauge"), pos("Remplir la jauge") + 1);
         assert_eq!(pos("Réglages…"), pos("Vider la jauge") + 1);
+        assert_eq!(pos("Quitter Osampo"), pos("Réglages…") + 1);
+        assert!(e[pos("Quitter Osampo")].1, "Quitter reste actif, daemon injoignable");
         assert!(!e[pos("Remplir la jauge")].1 && !e[pos("Vider la jauge")].1);
     }
 }
