@@ -144,7 +144,7 @@ def test_req009_fichier_d_etat_ecrit_tout_de_suite(monde):
 
 
 # ------------------------------------------------------------------ menu de l'icone
-ENTREES = ["Chatouiller", "Donner un os", "Remplir la jauge", "Vider la jauge", "Réglages…",
+ENTREES = ["Chatouiller", "Donner un os", "Donner un bain", "Remplir la jauge", "Vider la jauge", "Réglages…",
            "Quitter Osampo"]
 
 

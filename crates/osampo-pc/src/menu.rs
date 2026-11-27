@@ -1,6 +1,6 @@
 //! Menu `com.canonical.dbusmenu` de l'icône (SPEC-004) : statuts non cliquables, séparateur,
 //! pendant un rappel notifié `Accepter le rappel`, `Reporter N min` et un séparateur, puis
-//! `Chatouiller`, `Donner un os`, `Remplir la jauge`, `Vider la jauge`, `Réglages…`,
+//! `Chatouiller`, `Donner un os`, `Donner un bain`, `Remplir la jauge`, `Vider la jauge`, `Réglages…`,
 //! `Quitter Osampo`.
 //! La liste d'entrées est neutre ([`entrees`]) : le menu du chien (SPEC-011) la reprend.
 
@@ -16,6 +16,7 @@ use crate::statuts::{self, Vue};
 pub enum Action {
     Chatouille,
     Os,
+    Bain,
     Remplir,
     Vider,
     Reglages,
@@ -52,7 +53,7 @@ impl Entree {
 }
 
 /// Les entrées dans l'ordre : statuts non cliquables, séparateur, `Chatouiller`,
-/// `Donner un os`, `Remplir la jauge`, `Vider la jauge`, `Réglages…`, `Quitter Osampo`.
+/// `Donner un os`, `Donner un bain`, `Remplir la jauge`, `Vider la jauge`, `Réglages…`, `Quitter Osampo`.
 pub fn entrees(vue: &Vue) -> Vec<Entree> {
     let mut m: Vec<Entree> = statuts::lignes(vue).into_iter().map(Entree::statut).collect();
     m.push(Entree::separateur());
@@ -66,6 +67,7 @@ pub fn entrees(vue: &Vue) -> Vec<Entree> {
     let gestes = statuts::gestes_possibles(vue);
     m.push(Entree::geste("Chatouiller", Action::Chatouille, gestes));
     m.push(Entree::geste("Donner un os", Action::Os, gestes));
+    m.push(Entree::geste("Donner un bain", Action::Bain, gestes));
     // Jauge : actifs dès que le daemon est joignable, quel que soit l'état du chiot (SPEC-009).
     let joignable = vue.is_some();
     m.push(Entree::geste("Remplir la jauge", Action::Remplir, joignable));
@@ -116,20 +118,21 @@ mod tests {
     fn entrees_neutres_dans_l_ordre() {
         let e = entrees(&None);
         let n = e.len();
-        assert!(e[n - 7].separateur);
-        let fin: Vec<_> = e[n - 6..].iter().map(|x| (x.texte.as_str(), x.action, x.actif)).collect();
+        assert!(e[n - 8].separateur);
+        let fin: Vec<_> = e[n - 7..].iter().map(|x| (x.texte.as_str(), x.action, x.actif)).collect();
         assert_eq!(
             fin,
             vec![
                 ("Chatouiller", Some(Action::Chatouille), false),
                 ("Donner un os", Some(Action::Os), false),
+                ("Donner un bain", Some(Action::Bain), false),
                 ("Remplir la jauge", Some(Action::Remplir), false),
                 ("Vider la jauge", Some(Action::Vider), false),
                 ("Réglages…", Some(Action::Reglages), true),
                 ("Quitter Osampo", Some(Action::Quitter), true),
             ]
         );
-        assert!(e[..n - 7].iter().all(|x| x.action.is_none() && !x.actif && !x.separateur));
+        assert!(e[..n - 8].iter().all(|x| x.action.is_none() && !x.actif && !x.separateur));
     }
 
     fn avec_rappel(categorie: &str, etat: &str) -> Vue {
@@ -168,7 +171,8 @@ mod tests {
     fn jauge_grisee_seulement_daemon_injoignable() {
         let e = libelles(&None);
         let pos = |l: &str| e.iter().position(|(n, _)| n == l).unwrap();
-        assert_eq!(pos("Remplir la jauge"), pos("Donner un os") + 1);
+        assert_eq!(pos("Donner un bain"), pos("Donner un os") + 1);
+        assert_eq!(pos("Remplir la jauge"), pos("Donner un bain") + 1);
         assert_eq!(pos("Vider la jauge"), pos("Remplir la jauge") + 1);
         assert_eq!(pos("Réglages…"), pos("Vider la jauge") + 1);
         assert_eq!(pos("Quitter Osampo"), pos("Réglages…") + 1);

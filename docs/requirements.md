@@ -90,10 +90,10 @@ sans prendre le focus du clavier, et aucune autre fenêtre du chien n'apparaît 
 est accepté ou reporté (sur le PC ou sur la board), il revient à l'état du chiot, sans
 disparaître.
 
-### REQ-006 : chatouiller et donner un os depuis le PC
+### REQ-006 : chatouiller, donner un os ou un bain depuis le PC
 
-Depuis le PC (menu de l'icône ou fenêtre du chien), on peut chatouiller le chien ou lui donner
-un os.
+Depuis le PC (menu de l'icône ou fenêtre du chien), on peut chatouiller le chien, lui donner
+un os ou un bain (la brosse de la board).
 
 Critère : le chien du PC réagit (sprite et son) ; la commande est envoyée à la board par le
 daemon et la board joue la même réaction qu'un geste fait sur elle, en moins de 5 s si le lien

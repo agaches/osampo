@@ -254,7 +254,7 @@ impl EtatPc {
 
     fn evenement(&mut self, evt: &str, v: &Value, now: Heure) {
         match evt {
-            "os" | "chatouille" => {
+            "os" | "chatouille" | "bain" => {
                 let source = v.get("source").and_then(Value::as_str).unwrap_or("board");
                 self.dernier_geste = Some(Geste {
                     geste: evt.into(),
@@ -319,8 +319,12 @@ impl EtatPc {
             return inconnue();
         };
         match v.get("cmd").and_then(Value::as_str) {
-            Some(c @ ("chatouille" | "os")) => {
-                let nom = if c == "os" { "os" } else { "chatouille" };
+            Some(c @ ("chatouille" | "os" | "bain")) => {
+                let nom = match c {
+                    "os" => "os",
+                    "bain" => "bain",
+                    _ => "chatouille",
+                };
                 if !self.connecte {
                     return (reponse(nom, Some("board hors ligne")), vec![]);
                 }
@@ -627,6 +631,15 @@ mod tests {
         assert_eq!(pub_(&p, n)["dernier_geste"], json!({"geste": "os", "source": "pc", "heure": "14:12"}));
         p.ligne_board(r#"{"evt":"chatouille","source":"board"}"#, dim(14, 20));
         assert_eq!(pub_(&p, n)["dernier_geste"], json!({"geste": "chatouille", "source": "board", "heure": "14:20"}));
+        let (r, l) = p.commande(r#"{"cmd":"bain"}"#, dim(14, 21));
+        assert_eq!(r, r#"{"ok":true,"reponse":"bain"}"#);
+        assert_eq!(l, vec![r#"{"cmd":"bain"}"#]);
+        assert_eq!(pub_(&p, n)["dernier_geste"], json!({"geste": "bain", "source": "pc", "heure": "14:21"}));
+        p.ligne_board(r#"{"evt":"bain","source":"board"}"#, dim(14, 22));
+        assert_eq!(pub_(&p, n)["dernier_geste"], json!({"geste": "bain", "source": "board", "heure": "14:22"}));
+        p.ligne_board(&etat("promenade", "-", "-"), n);
+        let (r, _) = p.commande(r#"{"cmd":"bain"}"#, n);
+        assert!(r.contains("le chiot ne peut pas jouer maintenant"), "{r}");
         for l in ["n importe quoi", r#"{"cmd":"danse"}"#, r#"{"cmd":"accepter"}"#] {
             let (r, l) = p.commande(l, n);
             assert_eq!(r, r#"{"erreur":"commande inconnue","ok":false,"reponse":"?"}"#);

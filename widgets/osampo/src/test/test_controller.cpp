@@ -581,6 +581,27 @@ void commandes_chatouille_et_os()
     assert(e[1].kind == EvtKind::Os && e[1].source == "board");
 }
 
+void commande_bain()
+{
+    Controller c = started(at(15, 0));
+    c.on_command(cmd(Commande::Kind::Bain), 1001);
+    auto e = c.take_events();
+    assert(e.size() == 1 && e[0].kind == EvtKind::Bain && e[0].source == "pc");
+    assert(c.view().state == "bain" && c.view().anim == "bain");
+
+    // La brosse de la board : source "board".
+    Controller b = started(at(15, 0));
+    b.on_input(Input::Brosse, 1001);
+    e = b.take_events();
+    assert(e.size() == 1 && e[0].kind == EvtKind::Bain && e[0].source == "board");
+
+    // Il dort : bain ignore.
+    Controller d = started(at(15, 0));
+    d.on_input(Input::FaceDown, 1001);
+    d.on_command(cmd(Commande::Kind::Bain), 1002);
+    assert(d.take_events().empty() && d.view().state == "dort");
+}
+
 void commandes_ignorees_sans_evenement()
 {
     // En reclamation, en dodo, en promenade : chatouille et os ignores.
@@ -842,6 +863,7 @@ int main()
     claude_escalade_et_pose_dans_l_etat();
     relance_en_laisse_pose_aboie_trois_secondes();
     commandes_chatouille_et_os();
+    commande_bain();
     commandes_ignorees_sans_evenement();
     commande_accepter_sortie();
     commande_reporter_sortie_puis_accepter();

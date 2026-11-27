@@ -23,7 +23,7 @@ struct EtatBoard {
 };
 bool operator==(const EtatBoard &a, const EtatBoard &b);
 
-// Evenement a emettre. source : "board" ou "pc" pour Os / Chatouille, vide sinon.
+// Evenement a emettre. source : "board" ou "pc" pour Os / Chatouille / Bain, vide sinon.
 // rappel : id "categorie,HHMM" ou "promenade" pour Accepte / Reporte ; id pour Abandonne ; vide sinon.
 struct Evenement {
     EvtKind kind;
@@ -33,9 +33,9 @@ struct Evenement {
 
 // Commande recue du PC.
 struct Commande {
-    enum class Kind { Chatouille, Os, Accepter, Reporter };
+    enum class Kind { Chatouille, Os, Bain, Accepter, Reporter };
     Kind kind;
-    std::string rappel; // id "categorie,HHMM" ou "promenade" ; vide pour Chatouille / Os
+    std::string rappel; // id "categorie,HHMM" ou "promenade" ; vide pour Chatouille / Os / Bain
 };
 
 // "categorie,HHMM" (ex. "sortie,1230").
@@ -47,7 +47,7 @@ std::string ligne_evenement(const Evenement &e);
 // true si la ligne est un objet JSON portant la cle "cmd" (valide ou non).
 bool est_ligne_commande(const std::string &ligne);
 // nullopt si la ligne n'est pas une commande connue et complete (cmd inconnue, rappel manquant pour
-// accepter / reporter). Un "rappel" present sur chatouille / os est ignore.
+// accepter / reporter). Un "rappel" present sur chatouille / os / bain est ignore.
 std::optional<Commande> lire_commande(const std::string &ligne);
 
 // Tension de pile (mV) -> 0..100 ; -1 si inconnue (mv <= 0). Courbe LiPo 1S

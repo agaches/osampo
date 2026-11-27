@@ -58,6 +58,7 @@ fn reaction_board(avant: &Vue, apres: &Etat) -> Option<Reaction> {
     match geste.geste.as_str() {
         "chatouille" => Some(Reaction::Content),
         "os" => Some(Reaction::Mange),
+        "bain" => Some(Reaction::Bain),
         _ => None,
     }
 }
@@ -85,6 +86,12 @@ const OS: Geste = Geste {
     cmd: "os",
     reaction: Reaction::Mange,
     non_transmis: "Board hors ligne : os non transmis",
+};
+
+const BAIN: Geste = Geste {
+    cmd: "bain",
+    reaction: Reaction::Bain,
+    non_transmis: "Board hors ligne : bain non transmis",
 };
 
 /// Suite d'une commande de geste : à faire une fois la réponse du daemon reçue.
@@ -251,6 +258,7 @@ fn executer(
         Action::Reglages => lancer_reglages(reglages),
         Action::Chatouille => envoyer_geste(&CHATOUILLE, cmd_tx, suite_tx),
         Action::Os => envoyer_geste(&OS, cmd_tx, suite_tx),
+        Action::Bain => envoyer_geste(&BAIN, cmd_tx, suite_tx),
         Action::Remplir => regler_jauge(100, cmd_tx),
         Action::Vider => regler_jauge(0, cmd_tx),
         Action::Quitter => {} // traité par la boucle principale : il faut en sortir
@@ -344,6 +352,7 @@ mod tests {
             Some(Reaction::Content)
         );
         assert_eq!(reaction_board(&avant, &apres(Some(("os", "board", "14:14")))), Some(Reaction::Mange));
+        assert_eq!(reaction_board(&avant, &apres(Some(("bain", "board", "14:17")))), Some(Reaction::Bain));
         // geste du PC : déjà joué (SPEC-006)
         assert_eq!(reaction_board(&avant, &apres(Some(("os", "pc", "14:15")))), None);
         // geste inconnu, aucun geste
